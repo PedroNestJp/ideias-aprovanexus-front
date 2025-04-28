@@ -1,8 +1,8 @@
-// src/pages/LoginPage.tsx
-import { useState } from "react";
+import { GoogleLogin } from "@react-oauth/google";
 import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -17,16 +17,35 @@ export default function LoginPage() {
       login(response.data.access_token);
       navigate("/");
     } catch (error) {
-      console.error("Erro ao fazer login:", error);
+      console.error(error);
       alert("Erro ao fazer login. Verifique suas credenciais.");
     }
   };
 
+  interface CredentialResponse {
+    credential?: string;
+  }
+
+  const handleGoogleSuccess = async (
+    credentialResponse: CredentialResponse
+  ) => {
+    try {
+      const response = await api.post("/auth/google", {
+        credential: credentialResponse.credential,
+      });
+      login(response.data.access_token);
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      alert("Erro no login com Google.");
+    }
+  };
+
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-100">
+    <div className="flex flex-col h-screen items-center justify-center bg-gray-100">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded shadow-md w-96"
+        className="bg-white p-8 rounded shadow-md w-96 mb-4"
       >
         <h2 className="text-2xl mb-4 font-bold text-center">Login</h2>
         <input
@@ -47,11 +66,16 @@ export default function LoginPage() {
         />
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4"
         >
           Entrar
         </button>
       </form>
+
+      <GoogleLogin
+        onSuccess={handleGoogleSuccess}
+        onError={() => alert("Erro no login com Google")}
+      />
     </div>
   );
 }
