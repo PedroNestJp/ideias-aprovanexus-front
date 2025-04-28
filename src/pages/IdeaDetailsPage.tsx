@@ -174,37 +174,57 @@ export default function DetalhesIdeiaPage() {
         {comentarios.length > 0 ? (
           <div className="grid gap-4">
             {comentarios.map((comentario) => (
-              <div
-                key={comentario.id}
-                className="bg-white p-4 rounded shadow flex flex-col"
-              >
-                <p className="text-gray-700 mb-2">{comentario.texto}</p>
-                {comentario.anexo && (
-                  <a
-                    href={`http://localhost:3000/uploads/${comentario.anexo}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 underline mb-2"
-                  >
-                    Ver Anexo
-                  </a>
+              <div key={comentario.id} className="flex items-start mb-6">
+                {comentario.autor?.foto ? (
+                  comentario.autor.foto.startsWith("http") ? (
+                    <img
+                      src={comentario.autor.foto}
+                      alt="Foto do autor"
+                      className="w-10 h-10 rounded-full mr-4"
+                    />
+                  ) : (
+                    <img
+                      src={`http://localhost:3000/uploads/fotos-perfil/${comentario.autor.foto}`}
+                      alt="Foto do autor"
+                      className="w-10 h-10 rounded-full mr-4"
+                    />
+                  )
+                ) : (
+                  <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-4">
+                    <span className="text-white text-sm">?</span>
+                  </div>
                 )}
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-sm text-gray-500">
-                    Por: {comentario.autor?.nome}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {new Date(comentario.criadoEm).toLocaleDateString()}
-                  </span>
-                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-gray-700">
+                      {comentario.autor?.nome}
+                    </span>
+                    <span className="text-gray-400 text-sm">
+                      {new Date(comentario.criadoEm).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-gray-700 mt-2">{comentario.texto}</p>
 
-                {/* Botão curtir comentário */}
-                <button
-                  onClick={() => curtirComentario(comentario.id)}
-                  className="mt-3 bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 font-semibold"
-                >
-                  Curtir Comentário ({comentario.likes})
-                </button>
+                  {comentario.anexo && (
+                    <a
+                      href={`http://localhost:3000/uploads/${comentario.anexo}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline mt-2 block"
+                    >
+                      Ver Anexo
+                    </a>
+                  )}
+
+                  <div className="flex items-center gap-2 mt-2">
+                    <button
+                      onClick={() => curtirComentario(comentario.id)}
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      Curtir comentário ({comentario.likes})
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
