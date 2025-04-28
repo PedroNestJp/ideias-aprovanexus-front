@@ -1,0 +1,201 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import api from "../api/axios";
+import { useAuth } from "../auth/AuthContext";
+
+interface Comentario {
+  id: number;
+  texto: string;
+  anexo?: string;
+  autor: {
+    id: number;
+    nome: string;
+    email: string;
+  };
+  criadoEm: string;
+}
+
+interface Ideia {
+  id: number;
+  titulo: string;
+  descricao: string;
+  instituicao: string;
+  status: string;
+  likes: number;
+  anexo?: string;
+  usuario: {
+    nome: string;
+  };
+  criadoEm: string;
+}
+
+export default function IdeaDetailsPage() {
+  const { id } = useParams();
+  const { token } = useAuth();
+
+  const [ideia, setIdeia] = useState<Ideia | null>(null);
+  const [comentarios, setComentarios] = useState<Comentario[]>([]);
+  const [novoComentario, setNovoComentario] = useState("");
+  const [anexoComentario, setAnexoComentario] = useState<File | null>(null);
+
+  useEffect(() => {
+    buscarIdeia();
+    buscarComentarios();
+  }, [id]);
+
+  const buscarIdeia = async () => {
+    try {
+      const response = await api.get("/ideias");
+      const ideiaEncontrada = response.data.find(
+        (i: Ideia) => i.id === Number(id)
+      );
+      setIdeia(ideiaEncontrada);
+    } catch (error) {
+      console.error("Erro ao buscar ideia:", error);
+    }
+  };
+
+  const buscarComentarios = async () => {
+    try {
+      const response = await api.get(`/ideias/${id}/comentarios`);
+      console.log("buscarComentarios :>> ", response);
+      setComentarios(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar comentários:", error);
+    }
+  };
+
+  const handleEnviarComentario = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const formData = new FormData();
+      formData.append("texto", novoComentario);
+      console.log("novoComentario :>> ", novoComentario);
+      if (anexoComentario) {
+        formData.append("anexo", anexoComentario);
+        console.log("anexoComentario :>> ", anexoComentario);
+      }
+
+      await api.post(`/ideias/${id}/comentarios`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setNovoComentario("");
+      setAnexoComentario(null);
+      buscarComentarios();
+    } catch (error) {
+      console.error("Erro ao enviar comentário:", error);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center min-h-screen bg-gray-100 p-6">
+      {ideia ? (
+        <div className="bg-white p-8 rounded shadow w-full max-w-4xl mb-8">
+          <h1 className="text-3xl font-bold mb-2">{ideia.titulo}</h1>
+          <p className="text-gray-700 mb-4">{ideia.descricao}</p>
+          <div className="flex flex-wrap mb-4">
+            <span className="text-sm font-medium text-blue-600 mr-4">
+              Instituição: {ideia.instituicao}
+            </span>
+            <span className="text-sm font-medium text-green-600">
+              Status: {ideia.status}
+            </span>
+          </div>
+          {ideia.anexo && (
+            <a
+              href={`http://localhost:3000/uploads/${ideia.anexo}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline mb-4 block"
+            >
+              Ver Anexo
+            </a>
+          )}
+          <span className="text-gray-500 text-sm">
+            Criado por: {ideia.usuario?.nome}
+          </span>
+        </div>
+      ) : (
+        <p>Carregando ideia...</p>
+      )}
+
+      {/* Formulário para comentar */}
+      <form
+        onSubmit={handleEnviarComentario}
+        className="bg-white p-6 rounded shadow w-full max-w-4xl mb-8"
+      >
+        <h2 className="text-xl font-bold mb-4 text-blue-600">
+          Adicionar Comentário
+        </h2>
+        <textarea
+          value={novoComentario}
+          onChange={(e) => setNovoComentario(e.target.value)}
+          rows={3}
+          className="w-full p-2 border rounded mb-4"
+          required
+          placeholder="Escreva seu comentário..."
+        ></textarea>
+
+        <input
+          type="file"
+          onChange={(e) => setAnexoComentario(e.target.files?.[0] || null)}
+          className="mb-4 w-full"
+        />
+
+        <button
+          type="submit"
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full font-semibold"
+        >
+          Enviar Comentário
+        </button>
+      </form>
+
+      {/* Comentários */}
+      <div className="w-full max-w-4xl">
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">Comentários</h2>
+        {comentarios.length > 0 ? (
+          <div className="grid gap-4">
+            {comentarios.map(
+              (comentario) => (
+                console.log("comentario :>> ", comentario),
+                (
+                  <div
+                    key={comentario.id}
+                    className="bg-white p-4 rounded shadow flex flex-col"
+                  >
+                    <p className="text-gray-700 mb-2">{comentario.texto}</p>
+                    {comentario.anexo && (
+                      <a
+                        href={`http://localhost:3000/uploads/${comentario.anexo}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 underline mb-2"
+                      >
+                        Ver Anexo
+                      </a>
+                    )}
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">
+                        Por: {comentario.autor.nome}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {new Date(comentario.criadoEm).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                )
+              )
+            )}
+          </div>
+        ) : (
+          <p className="text-gray-500">Nenhum comentário ainda.</p>
+        )}
+      </div>
+    </div>
+  );
+}
