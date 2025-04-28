@@ -7,6 +7,7 @@ interface Comentario {
   id: number;
   texto: string;
   anexo?: string;
+  likes: number; // Adicionado campo likes
   autor: {
     id: number;
     nome: string;
@@ -29,7 +30,7 @@ interface Ideia {
   criadoEm: string;
 }
 
-export default function IdeaDetailsPage() {
+export default function DetalhesIdeiaPage() {
   const { id } = useParams();
   const { token } = useAuth();
 
@@ -58,7 +59,6 @@ export default function IdeaDetailsPage() {
   const buscarComentarios = async () => {
     try {
       const response = await api.get(`/ideias/${id}/comentarios`);
-      console.log("buscarComentarios :>> ", response);
       setComentarios(response.data);
     } catch (error) {
       console.error("Erro ao buscar comentários:", error);
@@ -71,10 +71,8 @@ export default function IdeaDetailsPage() {
     try {
       const formData = new FormData();
       formData.append("texto", novoComentario);
-      console.log("novoComentario :>> ", novoComentario);
       if (anexoComentario) {
         formData.append("anexo", anexoComentario);
-        console.log("anexoComentario :>> ", anexoComentario);
       }
 
       await api.post(`/ideias/${id}/comentarios`, formData, {
@@ -89,6 +87,21 @@ export default function IdeaDetailsPage() {
       buscarComentarios();
     } catch (error) {
       console.error("Erro ao enviar comentário:", error);
+    }
+  };
+
+  const curtirComentario = async (comentarioId: number) => {
+    try {
+      await api.post(
+        `/comentarios/${comentarioId}/like`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      buscarComentarios();
+    } catch (error) {
+      console.error("Erro ao curtir comentário:", error);
     }
   };
 
@@ -160,37 +173,40 @@ export default function IdeaDetailsPage() {
         <h2 className="text-2xl font-bold mb-4 text-gray-800">Comentários</h2>
         {comentarios.length > 0 ? (
           <div className="grid gap-4">
-            {comentarios.map(
-              (comentario) => (
-                console.log("comentario :>> ", comentario),
-                (
-                  <div
-                    key={comentario.id}
-                    className="bg-white p-4 rounded shadow flex flex-col"
+            {comentarios.map((comentario) => (
+              <div
+                key={comentario.id}
+                className="bg-white p-4 rounded shadow flex flex-col"
+              >
+                <p className="text-gray-700 mb-2">{comentario.texto}</p>
+                {comentario.anexo && (
+                  <a
+                    href={`http://localhost:3000/uploads/${comentario.anexo}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline mb-2"
                   >
-                    <p className="text-gray-700 mb-2">{comentario.texto}</p>
-                    {comentario.anexo && (
-                      <a
-                        href={`http://localhost:3000/uploads/${comentario.anexo}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 underline mb-2"
-                      >
-                        Ver Anexo
-                      </a>
-                    )}
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">
-                        Por: {comentario.autor.nome}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {new Date(comentario.criadoEm).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                )
-              )
-            )}
+                    Ver Anexo
+                  </a>
+                )}
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-sm text-gray-500">
+                    Por: {comentario.autor?.nome}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {new Date(comentario.criadoEm).toLocaleDateString()}
+                  </span>
+                </div>
+
+                {/* Botão curtir comentário */}
+                <button
+                  onClick={() => curtirComentario(comentario.id)}
+                  className="mt-3 bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 font-semibold"
+                >
+                  Curtir Comentário ({comentario.likes})
+                </button>
+              </div>
+            ))}
           </div>
         ) : (
           <p className="text-gray-500">Nenhum comentário ainda.</p>
