@@ -1,4 +1,3 @@
-// src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
@@ -9,34 +8,38 @@ import IdeaDetailsPage from "./pages/IdeaDetailsPage";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import ProfilePage from "./pages/ProfilePage";
 import HomePage from "./pages/HomePage";
+import Header from "./components/Header";
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/enviar-ideia"
-            element={
-              <ProtectedRoute>
-                <IdeaPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/ideias" element={<ListIdeasPage />} />
-          <Route path="/ideias/:id" element={<IdeaDetailsPage />} />
-          <Route path="/perfil/editar" element={<ProfileEditPage />} />
-          <Route
-            path="/perfil"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/" element={<HomePage />} />
-        </Routes>
+        <Header />
+        <div className="pt-20">
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/enviar-ideia"
+              element={
+                <ProtectedRoute>
+                  <IdeaPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/ideias" element={<ListIdeasPage />} />
+            <Route path="/ideias/:id" element={<IdeaDetailsPage />} />
+            <Route path="/perfil/editar" element={<ProfileEditPage />} />
+            <Route
+              path="/perfil"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/" element={<HomePage />} />
+          </Routes>
+        </div>
       </Router>
     </AuthProvider>
   );

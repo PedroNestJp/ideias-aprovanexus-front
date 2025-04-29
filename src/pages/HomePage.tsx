@@ -15,7 +15,7 @@ export default function HomePage() {
         </p>
 
         <Link
-          to="/nova-ideia"
+          to="/enviar-ideia"
           className="inline-block bg-blue-600 text-white py-3 px-6 rounded-lg text-lg hover:bg-blue-700 transition"
         >
           Enviar Minha Ideia

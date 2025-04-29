@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
+import UserAvatar from "../components/UserAvatar";
 
 interface Comentario {
   id: number;
@@ -12,6 +13,7 @@ interface Comentario {
     id: number;
     nome: string;
     email: string;
+    foto: string;
   };
   criadoEm: string;
 }
@@ -176,19 +178,11 @@ export default function DetalhesIdeiaPage() {
             {comentarios.map((comentario) => (
               <div key={comentario.id} className="flex items-start mb-6">
                 {comentario.autor?.foto ? (
-                  comentario.autor.foto.startsWith("http") ? (
-                    <img
-                      src={comentario.autor.foto}
-                      alt="Foto do autor"
-                      className="w-10 h-10 rounded-full mr-4"
-                    />
-                  ) : (
-                    <img
-                      src={`http://localhost:3000/uploads/fotos-perfil/${comentario.autor.foto}`}
-                      alt="Foto do autor"
-                      className="w-10 h-10 rounded-full mr-4"
-                    />
-                  )
+                  <UserAvatar
+                    foto={comentario.autor?.foto}
+                    nome={comentario.autor?.nome}
+                    size={32}
+                  />
                 ) : (
                   <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-4">
                     <span className="text-white text-sm">?</span>

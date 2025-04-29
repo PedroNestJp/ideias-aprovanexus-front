@@ -1,31 +1,68 @@
-// src/auth/AuthContext.tsx
-import { createContext, useContext, useState, ReactNode } from "react";
+// inova-frontend/src/auth/AuthContext.tsx
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+
+interface User {
+  id: number;
+  nome: string;
+  email: string;
+  foto?: string;
+}
 
 interface AuthContextType {
   token: string | null;
-  login: (token: string) => void;
+  user: User | null;
+  login: (token: string, user: User) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem("token")
-  );
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
-  const login = (token: string) => {
+  // Recupera o token e o usuário do localStorage no carregamento inicial
+  useEffect(() => {
+    const savedToken = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
+
+    if (savedToken) setToken(savedToken);
+
+    try {
+      if (savedUser && savedUser !== "undefined") {
+        const parsedUser = JSON.parse(savedUser);
+        if (parsedUser?.id && parsedUser?.email) {
+          setUser(parsedUser);
+        }
+      }
+    } catch (error) {
+      console.warn("Erro ao recuperar usuário do localStorage:", error);
+      setUser(null);
+    }
+  }, []);
+
+  const login = (token: string, user: User) => {
     localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
     setToken(token);
+    setUser(user);
   };
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setToken(null);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

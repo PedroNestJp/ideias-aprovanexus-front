@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
 import { Link } from "react-router-dom";
+import api from "../api/axios";
+import UserAvatar from "../components/UserAvatar";
 
 interface Ideia {
   id: number;
@@ -27,7 +28,7 @@ interface Comentario {
 }
 
 export default function ProfilePage() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [ideias, setIdeias] = useState<Ideia[]>([]);
   const [comentarios, setComentarios] = useState<Comentario[]>([]);
 
@@ -39,9 +40,7 @@ export default function ProfilePage() {
   const buscarMinhasIdeias = async () => {
     try {
       const response = await api.get("/perfil/ideias", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setIdeias(response.data);
     } catch (error) {
@@ -52,9 +51,7 @@ export default function ProfilePage() {
   const buscarMeusComentarios = async () => {
     try {
       const response = await api.get("/perfil/comentarios", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setComentarios(response.data);
     } catch (error) {
@@ -66,15 +63,30 @@ export default function ProfilePage() {
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-6">
       <div className="w-full max-w-5xl">
         <h1 className="text-3xl font-bold mb-8 text-center text-blue-700">
-          Meu Perfil
+          {/* nome do usuário */}
+          Olá, {user?.nome}!
         </h1>
-        <Link
-          to="/perfil/editar"
-          className="inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition mt-6"
-        >
-          Editar Perfil
-        </Link>
 
+        {/* Foto e nome do usuário */}
+        <div className="flex justify-center mb-4">
+          <UserAvatar foto={user?.foto} nome={user?.nome} size={96} />
+        </div>
+
+        <h2 className="text-xl font-semibold text-center mb-4 text-gray-800">
+          {user?.email}
+        </h2>
+
+        {/* Botão editar perfil */}
+        <div className="text-center mb-8">
+          <Link
+            to="/perfil/editar"
+            className="inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
+          >
+            Editar Perfil
+          </Link>
+        </div>
+
+        {/* Ideias */}
         <div className="bg-white p-6 rounded shadow mb-8">
           <h2 className="text-2xl font-semibold mb-4 text-green-600">
             Minhas Ideias
@@ -109,6 +121,7 @@ export default function ProfilePage() {
           )}
         </div>
 
+        {/* Comentários */}
         <div className="bg-white p-6 rounded shadow">
           <h2 className="text-2xl font-semibold mb-4 text-purple-600">
             Meus Comentários
@@ -118,7 +131,7 @@ export default function ProfilePage() {
               <div key={comentario.id} className="mb-4 p-4 border rounded">
                 <p className="text-gray-700">{comentario.texto}</p>
                 <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-500">
-                  <span>Na Ideia: {comentario.ideia?.titulo}</span>
+                  <span>Na ideia: {comentario.ideia?.titulo}</span>
                   <span>Likes: {comentario.likes}</span>
                   <span>
                     {new Date(comentario.criadoEm).toLocaleDateString()}

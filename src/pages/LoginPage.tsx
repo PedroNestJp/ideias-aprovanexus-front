@@ -14,7 +14,7 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       const response = await api.post("/auth/login", { email, senha });
-      login(response.data.access_token);
+      login(response.data.access_token, response.data.user);
       navigate("/");
     } catch (error) {
       console.error(error);
@@ -31,9 +31,9 @@ export default function LoginPage() {
   ) => {
     try {
       const response = await api.post("/auth/google", {
-        credential: credentialResponse.credential,
+        id_token: credentialResponse.credential,
       });
-      login(response.data.access_token);
+      login(response.data.access_token, response.data.user);
       navigate("/");
     } catch (error) {
       console.error(error);

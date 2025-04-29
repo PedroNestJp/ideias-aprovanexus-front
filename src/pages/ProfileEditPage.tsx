@@ -1,11 +1,11 @@
 import { useState } from "react";
 import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 export default function ProfileEditPage() {
   const { token } = useAuth();
-  const navigate = useNavigate();
+  //   const navigate = useNavigate();
 
   const [nome, setNome] = useState("");
   const [foto, setFoto] = useState<File | null>(null);
