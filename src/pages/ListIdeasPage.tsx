@@ -138,7 +138,9 @@ export default function ListIdeasPage() {
             {ideia.anexo && (
               <div className="mb-4">
                 <a
-                  href={`http://localhost:3000/uploads/${ideia.anexo}`}
+                  href={`${import.meta.env.VITE_API_URL}/uploads/${
+                    ideia.anexo
+                  }`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-500 underline"

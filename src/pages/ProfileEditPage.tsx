@@ -1,11 +1,9 @@
 import { useState } from "react";
 import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
-// import { useNavigate } from "react-router-dom";
 
 export default function ProfileEditPage() {
-  const { token } = useAuth();
-  //   const navigate = useNavigate();
+  const { token, user, setUser } = useAuth();
 
   const [nome, setNome] = useState("");
   const [foto, setFoto] = useState<File | null>(null);
@@ -22,12 +20,19 @@ export default function ProfileEditPage() {
       if (nome) formData.append("nome", nome);
       if (foto) formData.append("foto", foto);
 
-      await api.patch("/perfil", formData, {
+      const response = await api.patch("/perfil", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
+
+      console.log('api.patch("/perfil") :>> ', response.data);
+
+      // Atualiza user no AuthContext e localStorage
+      const updatedUser = response.data;
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setUser(updatedUser);
 
       setMensagem("Perfil atualizado com sucesso!");
     } catch (error) {
@@ -81,14 +86,14 @@ export default function ProfileEditPage() {
         <form onSubmit={atualizarPerfil} className="space-y-6 mb-10">
           <div>
             <label className="block mb-2 font-semibold text-gray-700">
-              Novo Nome
+              Nome
             </label>
             <input
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               className="w-full border rounded p-2"
-              placeholder="Digite seu novo nome"
+              placeholder={user?.nome}
             />
           </div>
 
