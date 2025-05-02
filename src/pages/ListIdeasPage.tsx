@@ -9,6 +9,7 @@ interface Ideia {
   descricao: string;
   instituicao: string;
   likes: number;
+  likedByUser: boolean;
   status: string;
   anexo?: string;
   usuario: {
@@ -21,7 +22,7 @@ export default function ListIdeasPage() {
   const [ideias, setIdeias] = useState<Ideia[]>([]);
   const [instituicaoFiltro, setInstituicaoFiltro] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("");
-  const [ordenacao, setOrdenacao] = useState("recentes"); // recentes ou curtidas
+  const [ordenacao, setOrdenacao] = useState("recentes");
   const { token } = useAuth();
 
   useEffect(() => {
@@ -30,12 +31,16 @@ export default function ListIdeasPage() {
 
   const buscarIdeias = async () => {
     try {
-      const response = await api.get("/ideias");
+      const response = await api.get("/ideias", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setIdeias(response.data);
     } catch (error) {
       console.error("Erro ao buscar ideias:", error);
     }
   };
+
+  console.log("ideias :>> ", ideias);
 
   const curtirIdeia = async (id: number) => {
     try {
@@ -171,8 +176,12 @@ export default function ListIdeasPage() {
 
             <div className="flex items-center justify-between">
               <button
+                className={`px-3 py-1 rounded text-sm font-medium transition ${
+                  ideia.likedByUser
+                    ? "bg-blue-700 text-white"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
                 onClick={() => curtirIdeia(ideia.id)}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 font-semibold"
               >
                 Curtir ({ideia.likes})
               </button>

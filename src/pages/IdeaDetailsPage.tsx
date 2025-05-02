@@ -8,7 +8,8 @@ interface Comentario {
   id: number;
   texto: string;
   anexo?: string;
-  likes: number; // Adicionado campo likes
+  likes: number;
+  likedByUser: boolean;
   autor: {
     id: number;
     nome: string;
@@ -48,7 +49,9 @@ export default function DetalhesIdeiaPage() {
 
   const buscarIdeia = async () => {
     try {
-      const response = await api.get("/ideias");
+      const response = await api.get("/ideias", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const ideiaEncontrada = response.data.find(
         (i: Ideia) => i.id === Number(id)
       );
@@ -60,7 +63,9 @@ export default function DetalhesIdeiaPage() {
 
   const buscarComentarios = async () => {
     try {
-      const response = await api.get(`/ideias/${id}/comentarios`);
+      const response = await api.get(`/ideias/${id}/comentarios`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setComentarios(response.data);
     } catch (error) {
       console.error("Erro ao buscar comentários:", error);
@@ -220,7 +225,11 @@ export default function DetalhesIdeiaPage() {
                   <div className="flex items-center gap-2 mt-2">
                     <button
                       onClick={() => curtirComentario(comentario.id)}
-                      className="text-sm text-blue-600 hover:underline"
+                      className={`px-2 py-1 text-sm rounded transition ${
+                        comentario.likedByUser
+                          ? "bg-purple-700 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
                     >
                       Curtir comentário ({comentario.likes})
                     </button>
