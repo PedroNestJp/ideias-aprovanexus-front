@@ -104,7 +104,9 @@ export default function ProfilePage() {
                 </div>
                 {ideia.anexo && (
                   <a
-                    href={`http://localhost:3000/uploads/${ideia.anexo}`}
+                    href={`${import.meta.env.VITE_API_URL}/uploads/${
+                      ideia.anexo
+                    }`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500 underline mt-2 block"
@@ -139,7 +141,9 @@ export default function ProfilePage() {
                 </div>
                 {comentario.anexo && (
                   <a
-                    href={`http://localhost:3000/uploads/${comentario.anexo}`}
+                    href={`${import.meta.env.VITE_API_URL}/uploads/${
+                      comentario.anexo
+                    }`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500 underline mt-2 block"

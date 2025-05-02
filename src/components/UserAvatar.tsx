@@ -11,7 +11,7 @@ export default function UserAvatar({ foto, nome, size = 40 }: UserAvatarProps) {
   const imgSrc = foto
     ? isUrl
       ? foto
-      : `http://localhost:3000/uploads/fotos-perfil/${foto}`
+      : `${import.meta.env.VITE_API_URL}/uploads/fotos-perfil/${foto}`
     : null;
 
   return (

@@ -7,7 +7,6 @@ import ListIdeasPage from "./pages/ListIdeasPage";
 import IdeaDetailsPage from "./pages/IdeaDetailsPage";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import ProfilePage from "./pages/ProfilePage";
-import HomePage from "./pages/HomePage";
 import Header from "./components/Header";
 
 function App() {
@@ -37,7 +36,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<ListIdeasPage />} />
           </Routes>
         </div>
       </Router>

@@ -1,12 +1,9 @@
 import { useState } from "react";
 import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
-// import { useNavigate } from "react-router-dom";
 
 export default function ProfileEditPage() {
-  const { token } = useAuth();
-  //   const navigate = useNavigate();
-
+  const { token, user, setUser } = useAuth();
   const [nome, setNome] = useState("");
   const [foto, setFoto] = useState<File | null>(null);
   const [senhaAtual, setSenhaAtual] = useState("");
@@ -16,18 +13,19 @@ export default function ProfileEditPage() {
 
   const atualizarPerfil = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       const formData = new FormData();
       if (nome) formData.append("nome", nome);
       if (foto) formData.append("foto", foto);
-
-      await api.patch("/perfil", formData, {
+      const response = await api.patch("/perfil", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
+      const updatedUser = response.data;
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setUser(updatedUser);
 
       setMensagem("Perfil atualizado com sucesso!");
     } catch (error) {
@@ -81,20 +79,20 @@ export default function ProfileEditPage() {
         <form onSubmit={atualizarPerfil} className="space-y-6 mb-10">
           <div>
             <label className="block mb-2 font-semibold text-gray-700">
-              Novo Nome
+              Novo nome de usuário
             </label>
             <input
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               className="w-full border rounded p-2"
-              placeholder="Digite seu novo nome"
+              placeholder={user?.nome}
             />
           </div>
 
           <div>
             <label className="block mb-2 font-semibold text-gray-700">
-              Foto de Perfil
+              Nova foto de perfil
             </label>
             <input
               type="file"

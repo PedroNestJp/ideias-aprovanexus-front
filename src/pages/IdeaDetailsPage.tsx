@@ -123,7 +123,7 @@ export default function DetalhesIdeiaPage() {
           </div>
           {ideia.anexo && (
             <a
-              href={`http://localhost:3000/uploads/${ideia.anexo}`}
+              href={`${import.meta.env.VITE_API_URL}/uploads/${ideia.anexo}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-500 underline mb-4 block"
@@ -201,12 +201,19 @@ export default function DetalhesIdeiaPage() {
 
                   {comentario.anexo && (
                     <a
-                      href={`http://localhost:3000/uploads/${comentario.anexo}`}
+                      href={`${import.meta.env.VITE_API_URL}/uploads/${
+                        comentario.anexo
+                      }`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-500 underline mt-2 block"
                     >
-                      Ver Anexo
+                      <img
+                        src={`${import.meta.env.VITE_API_URL}/uploads/${
+                          comentario.anexo
+                        }`}
+                        alt="Anexo"
+                        className="mt-2 max-w-full h-auto rounded"
+                      />
                     </a>
                   )}
 
