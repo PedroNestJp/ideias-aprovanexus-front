@@ -206,9 +206,14 @@ export default function DetalhesIdeiaPage() {
                       }`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-500 underline mt-2 block"
                     >
-                      Ver Anexo
+                      <img
+                        src={`${import.meta.env.VITE_API_URL}/uploads/${
+                          comentario.anexo
+                        }`}
+                        alt="Anexo"
+                        className="mt-2 max-w-full h-auto rounded"
+                      />
                     </a>
                   )}
 
