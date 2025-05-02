@@ -4,7 +4,6 @@ import { useAuth } from "../auth/AuthContext";
 
 export default function ProfileEditPage() {
   const { token, user, setUser } = useAuth();
-
   const [nome, setNome] = useState("");
   const [foto, setFoto] = useState<File | null>(null);
   const [senhaAtual, setSenhaAtual] = useState("");
@@ -14,22 +13,16 @@ export default function ProfileEditPage() {
 
   const atualizarPerfil = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       const formData = new FormData();
       if (nome) formData.append("nome", nome);
       if (foto) formData.append("foto", foto);
-
       const response = await api.patch("/perfil", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
-
-      console.log('api.patch("/perfil") :>> ', response.data);
-
-      // Atualiza user no AuthContext e localStorage
       const updatedUser = response.data;
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setUser(updatedUser);
@@ -86,7 +79,7 @@ export default function ProfileEditPage() {
         <form onSubmit={atualizarPerfil} className="space-y-6 mb-10">
           <div>
             <label className="block mb-2 font-semibold text-gray-700">
-              Nome
+              Novo nome de usuário
             </label>
             <input
               type="text"
@@ -99,7 +92,7 @@ export default function ProfileEditPage() {
 
           <div>
             <label className="block mb-2 font-semibold text-gray-700">
-              Foto de Perfil
+              Nova foto de perfil
             </label>
             <input
               type="file"
