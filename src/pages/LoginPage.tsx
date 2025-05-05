@@ -43,7 +43,6 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col h-screen items-center justify-center bg-gray-100">
-      <img src="/logo.png" alt="Logo" className="w-32 h-32 mb-4" />
       <h1 className="text-4xl mb-4 font-bold">Bem-vindo de volta!</h1>
       <p className="text-lg mb-4">Faça login para continuar</p>
       <p className="text-sm mb-4 text-gray-500">
