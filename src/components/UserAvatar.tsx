@@ -14,6 +14,9 @@ export default function UserAvatar({ foto, nome, size = 40 }: UserAvatarProps) {
       : `${import.meta.env.VITE_API_URL}/uploads/fotos-perfil/${foto}`
     : null;
 
+  console.log("isUrl :>> ", isUrl);
+  console.log("imgSrc :>> ", imgSrc);
+
   return (
     <div
       className="rounded-full overflow-hidden bg-gray-300 flex items-center justify-center text-white font-bold"
