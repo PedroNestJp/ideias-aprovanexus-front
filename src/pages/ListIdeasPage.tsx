@@ -1,3 +1,4 @@
+// src/pages/ListIdeasPage.tsx
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
@@ -39,8 +40,6 @@ export default function ListIdeasPage() {
       console.error("Erro ao buscar ideias:", error);
     }
   };
-
-  console.log("ideias :>> ", ideias);
 
   const curtirIdeia = async (id: number) => {
     try {
@@ -136,65 +135,70 @@ export default function ListIdeasPage() {
 
       {/* Listagem */}
       <div className="grid gap-6 w-full max-w-5xl">
-        {ideiasFiltradas.map((ideia) => (
-          <div
-            key={ideia.id}
-            className="bg-white rounded shadow p-6 flex flex-col"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-bold">{ideia.titulo}</h2>
-              <span className="text-sm text-gray-500">
-                {new Date(ideia.criadoEm).toLocaleDateString()}
-              </span>
-            </div>
+        {ideiasFiltradas.map(
+          (ideia) => (
+            console.log("ideia :>> ", ideia),
+            (
+              <div
+                key={ideia.id}
+                className="bg-white rounded shadow p-6 flex flex-col"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-xl font-bold">{ideia.titulo}</h2>
+                  <span className="text-sm text-gray-500">
+                    {new Date(ideia.criadoEm).toLocaleDateString()}
+                  </span>
+                </div>
 
-            <p className="text-gray-700 mb-4">{ideia.descricao}</p>
+                <p className="text-gray-700 mb-4">{ideia.descricao}</p>
 
-            <div className="flex items-center flex-wrap mb-4">
-              <span className="text-sm font-medium text-blue-600 mr-4">
-                Instituição: {ideia.instituicao}
-              </span>
-              <span className="text-sm font-medium text-green-600">
-                Status: {ideia.status}
-              </span>
-            </div>
+                <div className="flex items-center flex-wrap mb-4">
+                  <span className="text-sm font-medium text-blue-600 mr-4">
+                    Instituição: {ideia.instituicao}
+                  </span>
+                  <span className="text-sm font-medium text-green-600">
+                    Status: {ideia.status}
+                  </span>
+                </div>
 
-            {ideia.anexo && (
-              <div className="mb-4">
-                <a
-                  href={`${import.meta.env.VITE_API_URL}/uploads/${
-                    ideia.anexo
-                  }`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline"
-                >
-                  Ver Anexo
-                </a>
+                {ideia.anexo && (
+                  <div className="mb-4">
+                    <a
+                      href={`${import.meta.env.VITE_API_URL}/uploads/${
+                        ideia.anexo
+                      }`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline"
+                    >
+                      Ver Anexo
+                    </a>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between">
+                  <button
+                    className={`px-3 py-1 rounded text-sm font-medium transition ${
+                      ideia.likedByUser
+                        ? "bg-blue-700 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                    onClick={() => curtirIdeia(ideia.id)}
+                  >
+                    Curtir ({ideia.likes})
+                  </button>
+
+                  <Link
+                    to={`/ideias/${ideia.id}`}
+                    className="ml-4 bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 font-semibold"
+                  >
+                    Ver Detalhes
+                  </Link>
+                </div>
               </div>
-            )}
-
-            <div className="flex items-center justify-between">
-              <button
-                className={`px-3 py-1 rounded text-sm font-medium transition ${
-                  ideia.likedByUser
-                    ? "bg-blue-700 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-                onClick={() => curtirIdeia(ideia.id)}
-              >
-                Curtir ({ideia.likes})
-              </button>
-
-              <Link
-                to={`/ideias/${ideia.id}`}
-                className="ml-4 bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 font-semibold"
-              >
-                Ver Detalhes
-              </Link>
-            </div>
-          </div>
-        ))}
+            )
+          )
+        )}
       </div>
     </div>
   );

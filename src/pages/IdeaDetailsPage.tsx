@@ -1,3 +1,4 @@
+// src/pages/IdeaDetailsPage.tsx
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api/axios";
@@ -72,15 +73,25 @@ export default function DetalhesIdeiaPage() {
     }
   };
 
+  const MAX_FILE_SIZE = 2 * 1024 * 1024;
+  const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "application/pdf"];
+
   const handleEnviarComentario = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (
+      anexoComentario &&
+      (!SUPPORTED_FORMATS.includes(anexoComentario.type) ||
+        anexoComentario.size > MAX_FILE_SIZE)
+    ) {
+      alert("Anexo inválido. Use JPEG, PNG ou PDF com até 2MB.");
+      return;
+    }
 
     try {
       const formData = new FormData();
       formData.append("texto", novoComentario);
-      if (anexoComentario) {
-        formData.append("anexo", anexoComentario);
-      }
+      if (anexoComentario) formData.append("anexo", anexoComentario);
 
       await api.post(`/ideias/${id}/comentarios`, formData, {
         headers: {
@@ -128,12 +139,16 @@ export default function DetalhesIdeiaPage() {
           </div>
           {ideia.anexo && (
             <a
-              href={`${import.meta.env.VITE_API_URL}/uploads/${ideia.anexo}`}
+              href={`${ideia.anexo}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-500 underline mb-4 block"
             >
-              Ver Anexo
+              <img
+                src={`${ideia.anexo}`}
+                alt="Anexo da ideia"
+                className="mt-2 max-w-full h-auto rounded"
+              />{" "}
             </a>
           )}
           <span className="text-gray-500 text-sm">
@@ -163,6 +178,7 @@ export default function DetalhesIdeiaPage() {
 
         <input
           type="file"
+          accept="image/*,application/pdf"
           onChange={(e) => setAnexoComentario(e.target.files?.[0] || null)}
           className="mb-4 w-full"
         />
@@ -204,23 +220,21 @@ export default function DetalhesIdeiaPage() {
                   </div>
                   <p className="text-gray-700 mt-2">{comentario.texto}</p>
 
-                  {comentario.anexo && (
-                    <a
-                      href={`${import.meta.env.VITE_API_URL}/uploads/${
-                        comentario.anexo
-                      }`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <img
-                        src={`${import.meta.env.VITE_API_URL}/uploads/${
-                          comentario.anexo
-                        }`}
-                        alt="Anexo"
-                        className="mt-2 max-w-full h-auto rounded"
-                      />
-                    </a>
-                  )}
+                  {comentario.anexo &&
+                    (console.log("comentario :>> ", comentario),
+                    (
+                      <a
+                        href={`${comentario.anexo}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src={`${comentario.anexo}`}
+                          alt="Anexo"
+                          className="mt-2 max-w-full h-auto rounded"
+                        />
+                      </a>
+                    ))}
 
                   <div className="flex items-center gap-2 mt-2">
                     <button

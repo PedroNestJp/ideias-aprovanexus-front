@@ -11,6 +11,10 @@ export default function IdeaPage() {
   const [descricao, setDescricao] = useState("");
   const [instituicao, setInstituicao] = useState("");
   const [anexo, setAnexo] = useState<File | null>(null);
+  const [erro, setErro] = useState<string | null>(null);
+
+  const MAX_FILE_SIZE = 2 * 1024 * 1024;
+  const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "application/pdf"];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,14 +24,20 @@ export default function IdeaPage() {
       return;
     }
 
+    if (
+      anexo &&
+      (!SUPPORTED_FORMATS.includes(anexo.type) || anexo.size > MAX_FILE_SIZE)
+    ) {
+      setErro("Anexo inválido. Use JPEG, PNG ou PDF com até 2MB.");
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("titulo", titulo);
       formData.append("descricao", descricao);
       formData.append("instituicao", instituicao);
-      if (anexo) {
-        formData.append("anexo", anexo);
-      }
+      if (anexo) formData.append("anexo", anexo);
 
       await api.post("/ideias", formData, {
         headers: {
@@ -40,9 +50,7 @@ export default function IdeaPage() {
       navigate("/");
     } catch (error) {
       console.error("Erro ao enviar ideia:", error);
-      alert(
-        "Erro ao enviar ideia. Verifique se todos os campos foram preenchidos corretamente."
-      );
+      alert("Erro ao enviar ideia.");
     }
   };
 
@@ -55,6 +63,8 @@ export default function IdeaPage() {
         <h2 className="text-2xl mb-6 font-bold text-center text-blue-600">
           Nova Ideia
         </h2>
+
+        {erro && <p className="text-red-500 mb-4">{erro}</p>}
 
         <div className="mb-4">
           <label className="block mb-1 font-medium">Título</label>
@@ -101,6 +111,7 @@ export default function IdeaPage() {
           <label className="block mb-1 font-medium">Anexo (opcional)</label>
           <input
             type="file"
+            accept="image/*,application/pdf"
             onChange={(e) => setAnexo(e.target.files?.[0] || null)}
             className="w-full"
           />

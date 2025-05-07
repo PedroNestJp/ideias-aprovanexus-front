@@ -25,8 +25,6 @@ export default function Header() {
     navigate("/login");
   };
 
-  console.log("user :>> ", user);
-
   return (
     <header className="bg-white shadow-md py-4 px-6 flex justify-between items-center fixed top-0 left-0 right-0 z-50">
       <Link to="/" className="text-2xl font-bold text-blue-700">
