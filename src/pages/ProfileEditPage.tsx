@@ -6,31 +6,65 @@ export default function ProfileEditPage() {
   const { token, user, setUser } = useAuth();
   const [nome, setNome] = useState("");
   const [foto, setFoto] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarNovaSenha, setConfirmarNovaSenha] = useState("");
   const [mensagem, setMensagem] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const MAX_FILE_SIZE_MB = 2;
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setMensagem("Por favor, selecione um arquivo de imagem.");
+      setFoto(null);
+      setPreviewUrl(null);
+      return;
+    }
+
+    const fileSizeMB = file.size / (1024 * 1024);
+    if (fileSizeMB > MAX_FILE_SIZE_MB) {
+      setMensagem("Imagem muito grande. O limite é 2MB.");
+      setFoto(null);
+      setPreviewUrl(null);
+      return;
+    }
+
+    setFoto(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setMensagem("");
+  };
 
   const atualizarPerfil = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const formData = new FormData();
       if (nome) formData.append("nome", nome);
       if (foto) formData.append("foto", foto);
+
       const response = await api.patch("/perfil", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
+
       const updatedUser = response.data;
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setUser(updatedUser);
-
       setMensagem("Perfil atualizado com sucesso!");
     } catch (error) {
       console.error("Erro ao atualizar perfil:", error);
       setMensagem("Erro ao atualizar perfil.");
+    } finally {
+      setIsLoading(false);
+      setFoto(null);
+      setPreviewUrl(null);
     }
   };
 
@@ -45,10 +79,7 @@ export default function ProfileEditPage() {
     try {
       await api.patch(
         "/perfil/senha",
-        {
-          senhaAtual,
-          novaSenha,
-        },
+        { senhaAtual, novaSenha },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -64,6 +95,8 @@ export default function ProfileEditPage() {
       setMensagem("Erro ao alterar senha.");
     }
   };
+
+  console.log("API:", import.meta.env.VITE_API_URL);
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-6">
@@ -97,18 +130,32 @@ export default function ProfileEditPage() {
             <input
               type="file"
               accept="image/*"
-              onChange={(e) =>
-                setFoto(e.target.files ? e.target.files[0] : null)
-              }
+              onChange={handleFileChange}
               className="w-full"
             />
           </div>
 
+          {previewUrl && (
+            <div className="mb-4">
+              <p className="font-medium text-gray-700 mb-1">
+                Preview da nova foto:
+              </p>
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="w-24 h-24 rounded-full object-cover"
+              />
+            </div>
+          )}
+
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+            disabled={isLoading}
+            className={`w-full bg-blue-600 text-white py-2 rounded transition ${
+              isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+            }`}
           >
-            Atualizar Perfil
+            {isLoading ? "Atualizando..." : "Atualizar Perfil"}
           </button>
         </form>
 
