@@ -8,6 +8,7 @@ import IdeaDetailsPage from "./pages/IdeaDetailsPage";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import ProfilePage from "./pages/ProfilePage";
 import Header from "./components/Header";
+import RegisterPage from "./pages/RegisterPage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <div className="pt-20">
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route
               path="/enviar-ideia"
               element={
