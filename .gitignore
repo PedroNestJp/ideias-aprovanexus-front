@@ -26,6 +26,6 @@ dist-ssr
 .env.*
 __tests__*
 __mocks__*
-jest.config.js
-jest.setup.js
+jest.config.ts
+jest.setup.ts
 tsconfig.test.json
