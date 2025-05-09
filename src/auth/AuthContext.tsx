@@ -12,6 +12,7 @@ interface User {
   nome: string;
   email: string;
   foto?: string;
+  role: "usuario" | "diretor" | "admin";
 }
 
 interface AuthContextType {

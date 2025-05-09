@@ -37,7 +37,7 @@ interface Ideia {
 export default function DetalhesIdeiaPage() {
   const { id } = useParams();
   const { token } = useAuth();
-
+  const { user } = useAuth();
   const [ideia, setIdeia] = useState<Ideia | null>(null);
   const [comentarios, setComentarios] = useState<Comentario[]>([]);
   const [novoComentario, setNovoComentario] = useState("");
@@ -123,6 +123,22 @@ export default function DetalhesIdeiaPage() {
     }
   };
 
+  const atualizarStatus = async (novoStatus: string) => {
+    try {
+      await api.patch(
+        `/ideias/${id}/status`,
+        { status: novoStatus },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      await buscarIdeia(); // importante manter o await aqui
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error);
+      alert("Erro ao atualizar status");
+    }
+  };
+
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-6">
       {ideia ? (
@@ -133,6 +149,25 @@ export default function DetalhesIdeiaPage() {
             <span className="text-sm font-medium text-blue-600 mr-4">
               Instituição: {ideia.instituicao}
             </span>
+            {(user?.role === "admin" || user?.role === "diretor") && (
+              <div className="flex flex-col gap-2">
+                <label htmlFor="statusSelect" className="text-sm text-gray-600">
+                  Alterar status:
+                </label>
+                <select
+                  id="statusSelect"
+                  value={ideia.status}
+                  onChange={(e) => atualizarStatus(e.target.value)}
+                  className="border rounded p-2"
+                >
+                  <option value="Cadastrado">Cadastrado</option>
+                  <option value="Em desenvolvimento">Em desenvolvimento</option>
+                  <option value="Concluído">Concluído</option>
+                  <option value="Já existe no grupo">Já existe no grupo</option>
+                </select>
+              </div>
+            )}
+
             <span className="text-sm font-medium text-green-600">
               Status: {ideia.status}
             </span>
