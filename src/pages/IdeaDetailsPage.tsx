@@ -194,7 +194,6 @@ export default function DetalhesIdeiaPage() {
         <p>Carregando ideia...</p>
       )}
 
-      {/* Formulário para comentar */}
       <form
         onSubmit={handleEnviarComentario}
         className="bg-white p-6 rounded shadow w-full max-w-4xl mb-8"

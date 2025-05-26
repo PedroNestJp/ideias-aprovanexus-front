@@ -158,21 +158,6 @@ export default function ListIdeasPage() {
               </span>
             </div>
 
-            {ideia.anexo && (
-              <div className="mb-4">
-                <a
-                  href={`${import.meta.env.VITE_API_URL}/uploads/${
-                    ideia.anexo
-                  }`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline"
-                >
-                  Ver Anexo
-                </a>
-              </div>
-            )}
-
             <div className="flex items-center justify-between">
               <button
                 className={`px-3 py-1 rounded text-sm font-medium transition ${
