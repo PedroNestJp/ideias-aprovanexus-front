@@ -1,3 +1,4 @@
+// src/components/UserAvatar.tsx
 interface UserAvatarProps {
   foto?: string;
   nome?: string;
@@ -7,12 +8,7 @@ interface UserAvatarProps {
 export default function UserAvatar({ foto, nome, size = 40 }: UserAvatarProps) {
   const displaySize = `${size}px`;
 
-  const isUrl = foto?.startsWith("http");
-  const imgSrc = foto
-    ? isUrl
-      ? foto
-      : `http://localhost:3000/uploads/fotos-perfil/${foto}`
-    : null;
+  const imgSrc = foto || null;
 
   return (
     <div

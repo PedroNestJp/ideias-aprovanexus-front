@@ -1,3 +1,4 @@
+// src/pages/IdeaDetailsPage.tsx
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api/axios";
@@ -8,7 +9,8 @@ interface Comentario {
   id: number;
   texto: string;
   anexo?: string;
-  likes: number; // Adicionado campo likes
+  likes: number;
+  likedByUser: boolean;
   autor: {
     id: number;
     nome: string;
@@ -35,7 +37,7 @@ interface Ideia {
 export default function DetalhesIdeiaPage() {
   const { id } = useParams();
   const { token } = useAuth();
-
+  const { user } = useAuth();
   const [ideia, setIdeia] = useState<Ideia | null>(null);
   const [comentarios, setComentarios] = useState<Comentario[]>([]);
   const [novoComentario, setNovoComentario] = useState("");
@@ -48,7 +50,9 @@ export default function DetalhesIdeiaPage() {
 
   const buscarIdeia = async () => {
     try {
-      const response = await api.get("/ideias");
+      const response = await api.get("/ideias", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const ideiaEncontrada = response.data.find(
         (i: Ideia) => i.id === Number(id)
       );
@@ -60,22 +64,34 @@ export default function DetalhesIdeiaPage() {
 
   const buscarComentarios = async () => {
     try {
-      const response = await api.get(`/ideias/${id}/comentarios`);
+      const response = await api.get(`/ideias/${id}/comentarios`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setComentarios(response.data);
     } catch (error) {
       console.error("Erro ao buscar comentários:", error);
     }
   };
 
+  const MAX_FILE_SIZE = 2 * 1024 * 1024;
+  const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "application/pdf"];
+
   const handleEnviarComentario = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (
+      anexoComentario &&
+      (!SUPPORTED_FORMATS.includes(anexoComentario.type) ||
+        anexoComentario.size > MAX_FILE_SIZE)
+    ) {
+      alert("Anexo inválido. Use JPEG, PNG ou PDF com até 2MB.");
+      return;
+    }
 
     try {
       const formData = new FormData();
       formData.append("texto", novoComentario);
-      if (anexoComentario) {
-        formData.append("anexo", anexoComentario);
-      }
+      if (anexoComentario) formData.append("anexo", anexoComentario);
 
       await api.post(`/ideias/${id}/comentarios`, formData, {
         headers: {
@@ -107,6 +123,22 @@ export default function DetalhesIdeiaPage() {
     }
   };
 
+  const atualizarStatus = async (novoStatus: string) => {
+    try {
+      await api.patch(
+        `/ideias/${id}/status`,
+        { status: novoStatus },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      await buscarIdeia(); // importante manter o await aqui
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error);
+      alert("Erro ao atualizar status");
+    }
+  };
+
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-6">
       {ideia ? (
@@ -117,18 +149,41 @@ export default function DetalhesIdeiaPage() {
             <span className="text-sm font-medium text-blue-600 mr-4">
               Instituição: {ideia.instituicao}
             </span>
+            {(user?.role === "admin" || user?.role === "diretor") && (
+              <div className="flex flex-col gap-2">
+                <label htmlFor="statusSelect" className="text-sm text-gray-600">
+                  Alterar status:
+                </label>
+                <select
+                  id="statusSelect"
+                  value={ideia.status}
+                  onChange={(e) => atualizarStatus(e.target.value)}
+                  className="border rounded p-2"
+                >
+                  <option value="Cadastrado">Cadastrado</option>
+                  <option value="Em desenvolvimento">Em desenvolvimento</option>
+                  <option value="Concluído">Concluído</option>
+                  <option value="Já existe no grupo">Já existe no grupo</option>
+                </select>
+              </div>
+            )}
+
             <span className="text-sm font-medium text-green-600">
               Status: {ideia.status}
             </span>
           </div>
           {ideia.anexo && (
             <a
-              href={`http://localhost:3000/uploads/${ideia.anexo}`}
+              href={`${ideia.anexo}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-500 underline mb-4 block"
             >
-              Ver Anexo
+              <img
+                src={`${ideia.anexo}`}
+                alt="Anexo da ideia"
+                className="mt-2 max-w-full h-auto rounded"
+              />{" "}
             </a>
           )}
           <span className="text-gray-500 text-sm">
@@ -139,7 +194,6 @@ export default function DetalhesIdeiaPage() {
         <p>Carregando ideia...</p>
       )}
 
-      {/* Formulário para comentar */}
       <form
         onSubmit={handleEnviarComentario}
         className="bg-white p-6 rounded shadow w-full max-w-4xl mb-8"
@@ -158,6 +212,7 @@ export default function DetalhesIdeiaPage() {
 
         <input
           type="file"
+          accept="image/*,application/pdf"
           onChange={(e) => setAnexoComentario(e.target.files?.[0] || null)}
           className="mb-4 w-full"
         />
@@ -199,21 +254,30 @@ export default function DetalhesIdeiaPage() {
                   </div>
                   <p className="text-gray-700 mt-2">{comentario.texto}</p>
 
-                  {comentario.anexo && (
-                    <a
-                      href={`http://localhost:3000/uploads/${comentario.anexo}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 underline mt-2 block"
-                    >
-                      Ver Anexo
-                    </a>
-                  )}
+                  {comentario.anexo &&
+                    (console.log("comentario :>> ", comentario),
+                    (
+                      <a
+                        href={`${comentario.anexo}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src={`${comentario.anexo}`}
+                          alt="Anexo"
+                          className="mt-2 max-w-full h-auto rounded"
+                        />
+                      </a>
+                    ))}
 
                   <div className="flex items-center gap-2 mt-2">
                     <button
                       onClick={() => curtirComentario(comentario.id)}
-                      className="text-sm text-blue-600 hover:underline"
+                      className={`px-2 py-1 text-sm rounded transition ${
+                        comentario.likedByUser
+                          ? "bg-purple-700 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
                     >
                       Curtir comentário ({comentario.likes})
                     </button>

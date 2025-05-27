@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+// src/pages/ListIdeasPage.tsx
+import { useCallback, useEffect, useState } from "react";
 import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
 import { Link } from "react-router-dom";
@@ -9,6 +10,7 @@ interface Ideia {
   descricao: string;
   instituicao: string;
   likes: number;
+  likedByUser: boolean;
   status: string;
   anexo?: string;
   usuario: {
@@ -21,21 +23,23 @@ export default function ListIdeasPage() {
   const [ideias, setIdeias] = useState<Ideia[]>([]);
   const [instituicaoFiltro, setInstituicaoFiltro] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("");
-  const [ordenacao, setOrdenacao] = useState("recentes"); // recentes ou curtidas
+  const [ordenacao, setOrdenacao] = useState("recentes");
   const { token } = useAuth();
 
-  useEffect(() => {
-    buscarIdeias();
-  }, []);
-
-  const buscarIdeias = async () => {
+  const buscarIdeias = useCallback(async () => {
     try {
-      const response = await api.get("/ideias");
+      const response = await api.get("/ideias", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setIdeias(response.data);
     } catch (error) {
       console.error("Erro ao buscar ideias:", error);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    buscarIdeias();
+  }, [buscarIdeias]);
 
   const curtirIdeia = async (id: number) => {
     try {
@@ -67,7 +71,26 @@ export default function ListIdeasPage() {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold text-blue-600 mb-8">
+      <div className="bg-white p-10 rounded-lg shadow-lg w-full text-center mb-4">
+        <h1 className="text-4xl font-bold text-blue-700 mb-6">
+          Bem-vindo ao Inova Aprovanexus!
+        </h1>
+
+        <p className="text-gray-700 text-lg mb-8">
+          O Inova Aprovanexus é o espaço para você enviar ideias inovadoras e
+          ajudar a melhorar nossos serviços e instituições. Sua participação
+          transforma o futuro da nossa comunidade! 🚀
+        </p>
+
+        <Link
+          to="/enviar-ideia"
+          className="inline-block bg-blue-600 text-white py-3 px-6 rounded-lg text-lg hover:bg-blue-700 transition"
+        >
+          Enviar Minha Ideia
+        </Link>
+      </div>
+
+      <h1 className="text-3xl font-bold text-blue-600 mb-8 mt-4">
         Ideias Cadastradas
       </h1>
 
@@ -135,23 +158,14 @@ export default function ListIdeasPage() {
               </span>
             </div>
 
-            {ideia.anexo && (
-              <div className="mb-4">
-                <a
-                  href={`http://localhost:3000/uploads/${ideia.anexo}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline"
-                >
-                  Ver Anexo
-                </a>
-              </div>
-            )}
-
             <div className="flex items-center justify-between">
               <button
+                className={`px-3 py-1 rounded text-sm font-medium transition ${
+                  ideia.likedByUser
+                    ? "bg-blue-700 text-white"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
                 onClick={() => curtirIdeia(ideia.id)}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 font-semibold"
               >
                 Curtir ({ideia.likes})
               </button>
